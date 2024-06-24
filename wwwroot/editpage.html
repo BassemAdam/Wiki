@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Page</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.19.4/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+</head>
+<body>
+<div class="uk-container">
+    <h1>Edit Page</h1>
+    <form method="post" action="/{pageName}" enctype="multipart/form-data">
+        <input type="hidden" name="__RequestVerificationToken" value="{antiForgery}">
+        <div class="uk-form-stacked">
+            <div class="uk-margin">
+                <label class="uk-form-label" for="Name">Name</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="Name" name="Name" type="text" value="{pageName}">
+                </div>
+            </div>
+            <div class="uk-margin">
+                <label class="uk-form-label" for="Content">Content</label>
+                <div class="uk-form-controls">
+                    <textarea class="uk-textarea" id="Content" name="Content">{content}</textarea>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <label class="uk-form-label" for="Attachment">Attachment</label>
+                <div class="uk-form-custom" uk-form-custom="target: true">
+                    <input type="file" id="Attachment" name="Attachment">
+                    <input class="uk-input uk-form-width-large" type="text" placeholder="Click to select file" disabled>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <button class="uk-button uk-button-primary" type="submit">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    var easyMDE = new EasyMDE({
+        element: document.getElementById("Content")
+    });
+</script>
+</body>
+</html>

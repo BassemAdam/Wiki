@@ -14,9 +14,9 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using static HtmlBuilders.HtmlTags;
 
-const string DisplayDateFormat = "MMMM dd, yyyy";
-const string HomePageName = "home-page";
-const string HtmlMime = "text/html";
+const string displayDateFormat = "MMMM dd, yyyy";
+const string homePageName = "home-page";
+const string htmlMime = "text/html";
 
 var builder = WebApplication.CreateBuilder();
 builder.Services
@@ -32,20 +32,20 @@ var app = builder.Build();
 // Load home page
 app.MapGet("/", (Wiki wiki, Render render) =>
 {
-    Page? page = wiki.GetPage(HomePageName);
+    Page? page = wiki.GetPage(homePageName);
 
-    if (page is not object)
-        return Results.Redirect($"/{HomePageName}");
+    if (page is not null)
+        return Results.Redirect($"/{homePageName}");
 
-    return Results.Text(render.BuildPage(HomePageName, atBody: () =>
+    return Results.Text(render.BuildPage(homePageName, atBody: () =>
         new[]
         {
           RenderPageContent(page),
           RenderPageAttachments(page),
-          A.Href($"/edit?pageName={HomePageName}").Class("uk-button uk-button-default uk-button-small").Append("Edit").ToHtmlString()
+          A.Href($"/edit?pageName={homePageName}").Class("uk-button uk-button-default uk-button-small").Append("Edit").ToHtmlString()
         },
         atSidePanel: () => AllPages(wiki)
-      ).ToString(), HtmlMime);
+      ).ToString(), htmlMime);
 });
 
 app.MapGet("/new-page", (string? pageName) =>
@@ -68,34 +68,34 @@ app.MapGet("/new-page", (string? pageName) =>
 app.MapGet("/edit", (string pageName, HttpContext context, Wiki wiki, Render render, IAntiforgery antiForgery) =>
 {
     Page? page = wiki.GetPage(pageName);
-    if (page is not object)
+    if (page is not null)
         return Results.NotFound();
 
     return Results.Text(render.BuildEditorPage(pageName,
       atBody: () =>
         new[]
         {
-          BuildForm(new PageInput(page!.Id, pageName, page.Content, null), path: $"{pageName}", antiForgery: antiForgery.GetAndStoreTokens(context)),
-          RenderPageAttachmentsForEdit(page!, antiForgery.GetAndStoreTokens(context))
+          BuildForm(new PageInput(page.Id, pageName, page.Content, null), path: $"{pageName}", antiForgery: antiForgery.GetAndStoreTokens(context)),
+          RenderPageAttachmentsForEdit(page, antiForgery.GetAndStoreTokens(context))
         },
       atSidePanel: () =>
       {
           var list = new List<string>();
           // Do not show delete button on home page
-          if (!pageName!.ToString().Equals(HomePageName, StringComparison.Ordinal))
-              list.Add(RenderDeletePageButton(page!, antiForgery: antiForgery.GetAndStoreTokens(context)));
+          if (pageName.Equals(homePageName, StringComparison.Ordinal))
+              list.Add(RenderDeletePageButton(page, antiForgery: antiForgery.GetAndStoreTokens(context)));
 
           list.Add(Br.ToHtmlString());
           list.AddRange(AllPagesForEditing(wiki));
           return list;
-      }).ToString(), HtmlMime);
+      }).ToString(), htmlMime);
 });
 
 // Deal with attachment download
 app.MapGet("/attachment", (string fileId, Wiki wiki) =>
 {
     var file = wiki.GetFile(fileId);
-    if (file is not object)
+    if (file is not null)
       return Results.NotFound();
 
     app!.Logger.LogInformation("Attachment " + file.Value.meta.Id + " - " + file.Value.meta.Filename);
@@ -117,11 +117,11 @@ app.MapGet("/{pageName}", (string pageName, HttpContext context, Wiki wiki, Rend
           {
             RenderPageContent(page),
             RenderPageAttachments(page),
-            Div.Class("last-modified").Append("Last modified: " + page!.LastModifiedUtc.ToString(DisplayDateFormat)).ToHtmlString(),
+            Div.Class("last-modified").Append("Last modified: " + page!.LastModifiedUtc.ToString(displayDateFormat)).ToHtmlString(),
             A.Href($"/edit?pageName={pageName}").Append("Edit").ToHtmlString()
           },
           atSidePanel: () => AllPages(wiki)
-        ).ToString(), HtmlMime);
+        ).ToString(), htmlMime);
     }
     else
     {
@@ -131,7 +131,7 @@ app.MapGet("/{pageName}", (string pageName, HttpContext context, Wiki wiki, Rend
           {
             BuildForm(new PageInput(null, pageName, string.Empty, null), path: pageName, antiForgery: antiForgery.GetAndStoreTokens(context))
           },
-        atSidePanel: () => AllPagesForEditing(wiki)).ToString(), HtmlMime);
+        atSidePanel: () => AllPagesForEditing(wiki)).ToString(), htmlMime);
     }
 });
 
@@ -147,7 +147,7 @@ app.MapPost("/delete-page", async (HttpContext context, IAntiforgery antiForgery
         return Results.Redirect("/");
     }
 
-    var (isOk, exception) = wiki.DeletePage(Convert.ToInt32(id), HomePageName);
+    var (isOk, exception) = wiki.DeletePage(Convert.ToInt32(id), homePageName);
 
     if (!isOk && exception is object)
         app.Logger.LogError(exception, $"Error in deleting page id {id}");
@@ -202,7 +202,7 @@ app.MapPost("/{pageName}", async (HttpContext context, Wiki wiki, Render render,
     PageInput input = PageInput.From(context.Request.Form);
 
     var modelState = new ModelStateDictionary();
-    var validator = new PageInputValidator(pageName, HomePageName);
+    var validator = new PageInputValidator(pageName, homePageName);
     validator.Validate(input).AddToModelState(modelState, null);
 
     if (!modelState.IsValid)
@@ -213,7 +213,7 @@ app.MapPost("/{pageName}", async (HttpContext context, Wiki wiki, Render render,
             {
               BuildForm(input, path: $"{pageName}", antiForgery: antiForgery.GetAndStoreTokens(context), modelState)
             },
-          atSidePanel: () => AllPages(wiki)).ToString(), HtmlMime);
+          atSidePanel: () => AllPages(wiki)).ToString(), htmlMime);
     }
 
     var (isOk, p, ex) = wiki.SavePage(input);
@@ -374,7 +374,7 @@ static string BuildForm(PageInput input, string path, AntiforgeryTokenSet antiFo
         .Append(Input.Text.Class("uk-input uk-form-width-large").Attribute("placeholder", "Click to select file").ToggleAttribute("disabled", true))
       );
 
-    if (modelState is object && !modelState.IsValid)
+    if (modelState is null && !modelState.IsValid)
     {
         if (IsFieldOK("Name"))
         {
