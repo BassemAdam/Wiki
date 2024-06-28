@@ -1,0 +1,57 @@
+﻿@page
+@model Wiki.Pages.Add_Article
+
+<div class="uk-container">
+    <h1>Add Article</h1>
+    <form id="article-form" method="post" action="/Add-Article" onsubmit="syncEasyMDEContent()">
+        @* <form id="article-form" hx-post="/Add-Article" hx-redirect="/Index" hx-trigger="submit" hx-include-vals="#AntiForgeryToken" enctype="multipart/form-data" onsubmit="syncEasyMDEContent()"> *@
+        <input type="hidden" id="AntiForgeryToken" name="__RequestVerificationToken" value="@Model.__RequestVerificationToken">
+        <div class="uk-form-stacked">
+            <div class="uk-margin">
+                <label class="uk-form-label" for="ArticleName">Name</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="ArticleName" name="ArticleName" type="text" required>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <label class="uk-form-label" for="Content">Content</label>
+                <div class="uk-form-controls">
+                    <textarea class="uk-textarea" id="Content" name="Content" ></textarea>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <label class="uk-form-label" for="Attachment">Attachment</label>
+                <div class="uk-form-custom" uk-form-custom="target: true">
+                    <input type="file" id="Attachment" name="Attachment" required multiple>
+                    <input class="uk-input uk-form-width-large" type="text" placeholder="Click to select file" disabled>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <button class="uk-button uk-button-primary" type="submit">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    var easyMDE = new EasyMDE({
+        element: document.getElementById("Content"),
+        spellChecker: false,
+        autosave: {
+            enabled: true,
+            uniqueId: "AddArticleContent",
+            delay: 1000,
+        },
+        toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "preview", "side-by-side", "fullscreen"],
+    });
+
+    function syncEasyMDEContent() {
+        // Sync the content from EasyMDE to the textarea before form submission
+        var content = easyMDE.value();
+        document.getElementById('Content').value = content;
+
+        // If the content is empty, prevent form submission and show an error message
+        if (!content) {
+            alert('Content is required');
+        }
+    }
+</script>

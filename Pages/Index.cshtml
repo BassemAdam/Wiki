@@ -1,0 +1,52 @@
+﻿@page
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.19.4/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+</head>
+<body>
+<nav class="uk-navbar-container">
+    <div class="uk-container">
+        <div class="uk-navbar">
+            <div class="uk-navbar-left">
+                <ul class="uk-navbar-nav">
+                    <li class="uk-active"><a hx-get="/Home" hx-target="#content"><span uk-icon="home"></span></a></li>
+                    <li><a hx-get="/Add-Article" hx-target="#content"><span uk-icon="plus"></span> Add Article</a></li>
+                </ul>
+            </div>
+            <div class="uk-navbar-right">
+                <form class="uk-search uk-search-navbar uk-grid-small uk-grid" hx-post="/Search" hx-target="#content">
+                    <div class="uk-width-expand">
+                        <input class="uk-search-input" type="search" name="query" placeholder="Search...">
+                    </div>
+                    <div class="uk-width-auto">
+                        <button class="uk-button uk-button-default" type="submit"><span uk-icon="search"></span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+<div id="content" class="uk-container" hx-get="/Home" hx-target="#content" hx-trigger="load">
+</div>
+<script>
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+        if (event.detail.target.id === 'content' && event.detail.xhr.responseText.includes('Article added successfully')) {
+            alert('Article added successfully');
+        }
+    });
+    var easyMDE = new EasyMDE({
+        element: document.getElementById("Content")
+    });
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.19.4/dist/js/uikit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.19.4/dist/js/uikit-icons.min.js"></script>
+</body>
+</html>

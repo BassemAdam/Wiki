@@ -13,7 +13,19 @@
     <PackageReference Include="HtmlSanitizer" Version="8.0.865" />
     <PackageReference Include="LiteDb" Version="5.0.20" />
     <PackageReference Include="Markdig" Version="0.37.0" />
+    <PackageReference Include="microsoft.aspnetcore.mvc.razor.runtimecompilation" Version="8.0.6" />
     <PackageReference Include="Scriban" Version="5.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\Home\Page.cshtml" />
+    <_ContentIncludedByDefault Remove="Pages\Home\_PageContent.cshtml" />
+    <_ContentIncludedByDefault Remove="Pages\Home\_SidePanel.cshtml" />
+    <_ContentIncludedByDefault Remove="Pages\Shared\_Layout.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>
