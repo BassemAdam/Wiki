@@ -22,6 +22,11 @@ public class Wiki
     public Page? GetPage(string name) => _pages.FindOne(x => x.Name == name);
 
     public IEnumerable<string> GetAllPages() => _pages.FindAll().Select(x => x.Name);
+    public IEnumerable<Page> GetAllPagesDetails()
+    {
+        var pages = _pages.FindAll();
+        return pages;
+    }
 
     public (bool, Page?, Exception?) SavePage(PageInput input)
     {
@@ -36,6 +41,7 @@ public class Wiki
                 if (page == null) throw new Exception("Page not found");
                 page.Content = sanitizedContent;
                 page.LastModifiedUtc = DateTime.UtcNow;
+                page.Attachments =  input.FilePaths.Split(';').ToList();
                 _pages.Update(page);
             }
             else
@@ -44,7 +50,8 @@ public class Wiki
                 {
                     Name = input.Name,
                     Content = sanitizedContent,
-                    LastModifiedUtc = DateTime.UtcNow
+                    LastModifiedUtc = DateTime.UtcNow,
+                    Attachments = input.FilePaths.Split(';').ToList()
                 };
                 _pages.Insert(page);
             }
@@ -72,15 +79,26 @@ public class Wiki
         }
     }
 
-    public (bool, Page?, Exception?) DeleteAttachment(int pageId, string fileId)
+    public (bool, Page?, Exception?) DeleteAttachment(int pageId, string fileName)
     {
         try
         {
             var page = _pages.FindById(pageId);
             if (page == null) throw new Exception("Page not found");
-            page.Attachments.Remove(fileId);
-            _pages.Update(page);
-            return (true, page, null);
+            if (page.Attachments.Remove(fileName))
+            {
+                var filePath = Path.Combine("wwwroot/uploads", fileName);
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+                _pages.Update(page);
+                return (true, page, null);
+            }
+            else
+            {
+                throw new Exception("Attachment not found");
+            }
         }
         catch (Exception ex)
         {

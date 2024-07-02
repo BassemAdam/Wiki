@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+   
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.19.4/dist/css/uikit.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
     <script src="https://unpkg.com/htmx.org@1.6.1"></script>
 </head>
@@ -21,12 +24,10 @@
                 </ul>
             </div>
             <div class="uk-navbar-right">
-                <form class="uk-search uk-search-navbar uk-grid-small uk-grid" hx-post="/Search" hx-target="#content">
+               <form class="uk-search uk-search-navbar uk-grid-small uk-grid">
                     <div class="uk-width-expand">
-                        <input class="uk-search-input" type="search" name="query" placeholder="Search...">
-                    </div>
-                    <div class="uk-width-auto">
-                        <button class="uk-button uk-button-default" type="submit"><span uk-icon="search"></span></button>
+                        <input class="uk-search-input form-control" type="search" name="query" id="query" autocomplete="off" hx-get="/Search" hx-target="#content" hx-trigger="keyup changed delay:250ms" hx-indicator="#loading" placeholder="Search..." aria-label="Username" aria-describedby="search-addon" style="padding-right: 40px;">
+                        <span uk-icon="search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></span>
                     </div>
                 </form>
             </div>
@@ -37,15 +38,20 @@
 </div>
 <script>
     document.body.addEventListener('htmx:afterRequest', function (event) {
-        if (event.detail.target.id === 'content' && event.detail.xhr.responseText.includes('Article added successfully')) {
-            alert('Article added successfully');
+        if (event.detail.target.id === 'content') {
+            var response = JSON.parse(event.detail.xhr.responseText);
+            if (response.success && response.message.includes('Article added successfully')) {
+                location.reload();
+                    alert('Article added successfully');
+            }
         }
     });
-    var easyMDE = new EasyMDE({
-        element: document.getElementById("Content")
-    });
+    
 
 </script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/uikit@3.19.4/dist/js/uikit.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/uikit@3.19.4/dist/js/uikit-icons.min.js"></script>
 </body>

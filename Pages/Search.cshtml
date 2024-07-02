@@ -1,0 +1,39 @@
+﻿@page
+@model Wiki.Pages.SearchModel
+@{
+    Layout = null;
+}
+
+<div class="container mt-4">
+    <h2>Search Results</h2>
+    @if (Model.SearchResults != null && Model.SearchResults.Any())
+    {
+        <div class="row">
+            @foreach (var result in Model.SearchResults)
+            {
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h5 class="card-title mb-0">@result.Name</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="content-preview">@Html.Raw(result.Content)</p>
+                        </div>
+                        <div class="card-footer text-center">
+                            <a href="/ArticleDetail/@result.Id" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right"></i> Dive In
+                            </a>
+                            <a href="#" class="btn btn-secondary ms-2">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No results found.</p>
+    }
+</div>

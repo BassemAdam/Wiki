@@ -1,0 +1,61 @@
+﻿@page
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@model Wiki.Pages.Components._CardsArticlesPartial
+
+@{
+    int pageIndex = 0;
+    if (Request.Query["page"].Count > 0) {
+        pageIndex = int.Parse(Request.Query["page"]);
+    }
+
+    var pageGroups = Model.Pages.Select((page, index) => new { Page = page, Index = index })
+        .GroupBy(x => x.Index / 4)
+        .Select(g => g.Select(x => x.Page).ToList())
+        .ToList();
+
+    var selectedGroup = pageGroups.ElementAtOrDefault(pageIndex) ?? new List<Wiki.Models.Page>();
+}
+
+@if (selectedGroup.Any())
+{
+    <div class="carousel-item active">
+        <div class="row">
+            @foreach (var pageItem in selectedGroup)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h5 class="card-title mb-0">@pageItem.Name</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="content-preview">@Html.Raw(pageItem.Content)</p>
+                        </div>
+                        <div class="card-footer text-center">
+                            <a href="/ArticleDetail/@pageItem.Id" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right"></i> Dive In
+                            </a>
+                            <a href="#" class="btn btn-secondary ms-2">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <script>
+        document.querySelectorAll('.carousel-control-next').forEach(button => {
+            button.style.display = 'none';
+        });
+    </script>
+    <div class="carousel-item active">
+        <div class="row">
+            <div class="col text-center">
+                <p>No articles available.</p>
+            </div>
+        </div>
+    </div>
+}

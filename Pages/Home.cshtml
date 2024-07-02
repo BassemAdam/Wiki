@@ -5,26 +5,137 @@
     Layout = null;
 }
 
+<style>
+    .content-preview {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .carousel-item {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .carousel-item > .col {
+        flex: 0 0 24%;
+        margin: 1%;
+    }
+
+    .carousel-container {
+        position: relative;
+    }
+
+    .carousel-inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+</style>
+
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
 <!-- Popular Articles Section -->
-<div class="uk-section">
+<div class="container mt-4">
     <h2>Popular Articles</h2>
-    <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1" uk-slider="finite: true">
-        <ul class="uk-slider-items uk-child-width-1-3@m uk-grid" hx-get="/PopularArticles" hx-trigger="load">
-            <!-- Popular articles will be dynamically loaded here -->
-        </ul>
-        <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous uk-slider-item="previous"></a>
-        <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next uk-slider-item="next"></a>
+    <div id="popularArticlesContainer" class="carousel slide carousel-container" data-bs-ride="carousel" style="position: relative;">
+        <span type="button" class="btn btn-primary carousel-control-prev carousel-control-prev-icon" aria-hidden="true" hx-get="/Components/_CardsArticlesPartial?handler=PopularArticles" hx-vals='{"page": 0}' hx-target="#popularArticlesContainer .carousel-inner" hx-swap="innerHTML" data-page="0" style="position: absolute; top: 50%; transform: translateY(-50%); left: 10px; background-color: cornflowerblue;"></span>
+        <div class="carousel-inner" hx-get="/Components/_CardsArticlesPartial?handler=PopularArticles&page=0" hx-trigger="load" hx-target="#popularArticlesContainer .carousel-inner" hx-swap="innerHTML"></div>
+        <span type="button" class="btn btn-primary carousel-control-next carousel-control-next-icon" aria-hidden="true" hx-get="/Components/_CardsArticlesPartial?handler=PopularArticles" hx-vals='{"page": 1}' hx-target="#popularArticlesContainer .carousel-inner" hx-swap="innerHTML" data-page="1" style="position: absolute; top: 50%; transform: translateY(-50%); right: 10px; background-color: cornflowerblue;"></span>
     </div>
 </div>
 
 <!-- Recently Added Articles Section -->
-<div class="uk-section">
-    <h2>Recently Modified Articles</h2>
-    <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1" uk-slider="finite: true">
-        <ul class="uk-slider-items uk-child-width-1-3@m uk-grid" hx-get="/RecentlyAddedArticles" hx-trigger="load">
-            <!-- Recently added articles will be dynamically loaded here -->
-        </ul>
-        <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous uk-slider-item="previous"></a>
-        <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next uk-slider-item="next"></a>
+<div class="container mt-4">
+    <h2 class="mb-4">Recently Modified Articles</h2>
+    <div id="recentlyAddedArticlesContainer" class="carousel slide carousel-container" data-bs-ride="carousel" style="position: relative;">
+        <span type="button" class="btn btn-primary carousel-control-prev carousel-control-prev-icon" aria-hidden="true" hx-get="/Components/_CardsArticlesPartial?handler=RecentlyModifiedArticles" hx-vals='{"page": 0}' hx-target="#recentlyAddedArticlesContainer .carousel-inner" hx-swap="innerHTML" data-page="0" style="position: absolute; top: 50%; transform: translateY(-50%); left: 10px; background-color: cornflowerblue;"></span>
+        <div class="carousel-inner" hx-get="/Components/_CardsArticlesPartial?handler=RecentlyModifiedArticles&page=0" hx-trigger="load" hx-target="#recentlyAddedArticlesContainer .carousel-inner" hx-swap="innerHTML"></div>
+        <span type="button" class="btn btn-primary carousel-control-next carousel-control-next-icon" aria-hidden="true" hx-get="/Components/_CardsArticlesPartial?handler=RecentlyModifiedArticles" hx-vals='{"page": 1}' hx-target="#recentlyAddedArticlesContainer .carousel-inner" hx-swap="innerHTML" data-page="1" style="position: absolute; top: 50%; transform: translateY(-50%); right: 10px; background-color: cornflowerblue;"></span>
     </div>
 </div>
+
+<script src="https://unpkg.com/htmx.org@1.5.0"></script>
+<script>
+    let popularPageIndex = 0;
+    let recentlyAddedPageIndex = 0;
+
+    function updateButtons(containerId, pageIndex) {
+        const container = document.getElementById(containerId);
+        const prevButton = container.querySelector('.carousel-control-prev');
+        const nextButton = container.querySelector('.carousel-control-next');
+
+        if (pageIndex <= 0) {
+            prevButton.style.display = 'none';
+        } else {
+            prevButton.style.display = 'block';
+        }
+
+        const maxPageIndex = 5; // Change this as needed
+        if (pageIndex >= maxPageIndex) {
+            nextButton.style.display = 'none';
+        } else {
+            nextButton.style.display = 'block';
+        }
+
+        // Update the hx-vals attribute for the buttons
+        prevButton.setAttribute('hx-vals', JSON.stringify({ page: pageIndex - 1 }));
+        nextButton.setAttribute('hx-vals', JSON.stringify({ page: pageIndex + 1 }));
+    }
+
+    function handleButtonClick(button, increment, containerId) {
+        const container = document.getElementById(containerId);
+        let pageIndex = containerId.includes('popular') ? popularPageIndex : recentlyAddedPageIndex;
+
+        pageIndex += increment;
+        if (pageIndex < 0) pageIndex = 0;
+
+        if (containerId.includes('popular')) {
+            popularPageIndex = pageIndex;
+        } else {
+            recentlyAddedPageIndex = pageIndex;
+        }
+
+        updateButtons(containerId, pageIndex);
+    }
+
+    document.querySelectorAll('#popularArticlesContainer .carousel-control-prev').forEach(button => {
+        button.addEventListener('click', function() {
+            handleButtonClick(this, -1, 'popularArticlesContainer');
+        });
+    });
+
+    document.querySelectorAll('#popularArticlesContainer .carousel-control-next').forEach(button => {
+        button.addEventListener('click', function() {
+            handleButtonClick(this, 1, 'popularArticlesContainer');
+        });
+    });
+
+    document.querySelectorAll('#recentlyAddedArticlesContainer .carousel-control-prev').forEach(button => {
+        button.addEventListener('click', function() {
+            handleButtonClick(this, -1, 'recentlyAddedArticlesContainer');
+        });
+    });
+
+    document.querySelectorAll('#recentlyAddedArticlesContainer .carousel-control-next').forEach(button => {
+        button.addEventListener('click', function() {
+            handleButtonClick(this, 1, 'recentlyAddedArticlesContainer');
+        });
+    });
+
+    htmx.on('htmx:afterRequest', function(evt) {
+        const target = evt.detail.target;
+        const pageIndex = target.id.includes('popular') ? popularPageIndex : recentlyAddedPageIndex;
+        updateButtons(target.id, pageIndex);
+    });
+
+    updateButtons('popularArticlesContainer', popularPageIndex);
+    updateButtons('recentlyAddedArticlesContainer', recentlyAddedPageIndex);
+</script>

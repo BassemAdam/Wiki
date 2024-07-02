@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Antiforgery;
+using Wiki.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -179,30 +180,4 @@ app.MapGet("/htmx/page-content/{pageName}", async context =>{
 
 app.Run();
 
-public record PageInput(int? Id, string Name, string Content, IFormFileCollection? Files)
-{
-    public static PageInput From(IFormCollection form)
-    {
-        return new PageInput(
-            int.TryParse(form["Id"], out var id) ? id : null,
-            form["Name"],
-            form["Content"],
-            form.Files);
-    }
-}
 
-public class WikiConfig
-{
-    public string PageName { get; set; }
-    public string HomePageName { get; set; }
-}
-public class PageInputValidator : AbstractValidator<PageInput>
-{
-    public PageInputValidator(WikiConfig config)
-    {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Name is required.")
-            .Must(name => !name.Equals(config.HomePageName, StringComparison.OrdinalIgnoreCase)).WithMessage("Page name cannot be 'home-page'.");
-        RuleFor(x => x.Content).NotEmpty().WithMessage("Content is required.");
-    }
-}

@@ -3,8 +3,7 @@
 
 <div class="uk-container">
     <h1>Add Article</h1>
-    <form id="article-form" method="post" action="/Add-Article" onsubmit="syncEasyMDEContent()">
-        @* <form id="article-form" hx-post="/Add-Article" hx-redirect="/Index" hx-trigger="submit" hx-include-vals="#AntiForgeryToken" enctype="multipart/form-data" onsubmit="syncEasyMDEContent()"> *@
+    <form id="article-form" hx-post="/Add-Article" hx-redirect="/Index" hx-trigger="submit" enctype="multipart/form-data" onsubmit="syncEasyMDEContent()">
         <input type="hidden" id="AntiForgeryToken" name="__RequestVerificationToken" value="@Model.__RequestVerificationToken">
         <div class="uk-form-stacked">
             <div class="uk-margin">

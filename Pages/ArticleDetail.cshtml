@@ -1,0 +1,45 @@
+﻿@page "/ArticleDetail/{id:int}"
+@model Wiki.Pages.ArticleDetailModel
+
+@{
+    var article = Model.Article;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .article-header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .article-content {
+            padding: 20px;
+        }
+        .article-footer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+    <title>@article.Name - Wiki</title>
+</head>
+<body>
+<div class="container">
+    <div class="article-header">
+        <h1>@article.Name</h1>
+    </div>
+    <div class="article-content">
+        @Html.Raw(article.Content)
+    </div>
+    <div class="article-footer">
+        <p>Last modified: @article.LastModifiedUtc.ToString("MMMM dd, yyyy")</p>
+    </div>
+</div>
+</body>
+</html>
