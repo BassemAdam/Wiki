@@ -24,7 +24,7 @@ namespace Wiki.Pages.Components
         {
             var pages = _wiki.GetAllPagesDetails()
                 .OrderByDescending(x => x.NumOfVisits)
-                .Take(10); // Get the top 10 most visited articles
+                .Take(8); // Get the top 10 most visited articles
 
             if (pages != null)
             {

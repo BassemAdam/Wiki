@@ -31,7 +31,6 @@
                             @if (!string.IsNullOrEmpty(pageItem.Content) && pageItem.Content.Contains("<img"))
                             {
                                 <div class="image-preview">
-                                    <!-- Optionally, you can hide the image on small screens by adding a class like 'd-none d-md-block' -->
                                     @Html.Raw(Model.TruncateContent(pageItem.Content))
                                 </div>
                             }
@@ -63,15 +62,10 @@
 }
 else
 {
-    <script>
-        document.querySelectorAll('.carousel-control-next').forEach(button => {
-            button.style.display = 'none';
-        });
-    </script>
     <div class="carousel-item active">
         <div class="row">
             <div class="col text-center">
-                <p>No articles available.</p>
+                <p>Want more articles in this category? Just donate $100! (Kidding... but seriously, $100 would be awesome.</p>
             </div>
         </div>
     </div>
@@ -101,71 +95,3 @@ else
     }
 </style>
 
-<script>
-    let popularPageIndex = 0;
-    let recentlyAddedPageIndex = 0;
-
-    function updateButtons(containerId, pageIndex) {
-        const container = document.getElementById(containerId);
-        const prevButton = container.querySelector('.carousel-control-prev');
-        const nextButton = container.querySelector('.carousel-control-next');
-
-        if (pageIndex <= 0) {
-            prevButton.style.display = 'none';
-        } else {
-            prevButton.style.display = 'block';
-        }
-
-        const maxPageIndex = 5; // Change this as needed
-        if (pageIndex >= maxPageIndex) {
-            nextButton.style.display = 'none';
-        } else {
-            nextButton.style.display = 'block';
-        }
-
-        // Update the hx-vals attribute for the buttons
-        prevButton.setAttribute('hx-vals', JSON.stringify({ page: pageIndex - 1 }));
-        nextButton.setAttribute('hx-vals', JSON.stringify({ page: pageIndex + 1 }));
-    }
-
-    function handleButtonClick(button, increment, containerId) {
-        let pageIndex;
-        if (containerId.includes('popular')) {
-            pageIndex = popularPageIndex + increment;
-            if (pageIndex < 0) pageIndex = 0;
-            popularPageIndex = pageIndex;
-        } else {
-            pageIndex = recentlyAddedPageIndex + increment;
-            if (pageIndex < 0) pageIndex = 0;
-            recentlyAddedPageIndex = pageIndex;
-        }
-
-        updateButtons(containerId, pageIndex);
-    }
-
-    document.querySelectorAll('.carousel-control-prev').forEach(button => {
-        button.addEventListener('click', function() {
-            const containerId = this.closest('.carousel-container').id;
-            handleButtonClick(this, -1, containerId);
-        });
-    });
-
-    document.querySelectorAll('.carousel-control-next').forEach(button => {
-        button.addEventListener('click', function() {
-            const containerId = this.closest('.carousel-container').id;
-            handleButtonClick(this, 1, containerId);
-        });
-    });
-
-    htmx.on('htmx:afterRequest', function(evt) {
-        const target = evt.detail.target.closest('.carousel-container');
-        if (target.id.includes('popular')) {
-            updateButtons(target.id, popularPageIndex);
-        } else {
-            updateButtons(target.id, recentlyAddedPageIndex);
-        }
-    });
-
-    updateButtons('popularArticlesContainer', popularPageIndex);
-    updateButtons('recentlyAddedArticlesContainer', recentlyAddedPageIndex);
-</script>
