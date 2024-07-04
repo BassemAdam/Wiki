@@ -4,7 +4,8 @@
 
 @{
     int pageIndex = 0;
-    if (Request.Query["page"].Count > 0) {
+    if (Request.Query["page"].Count > 0)
+    {
         pageIndex = int.Parse(Request.Query["page"]);
     }
 
@@ -19,15 +20,15 @@
 @if (selectedGroup.Any())
 {
     <div class="carousel-item active">
-        <div class="row">
+        <div class="row justify-content-center">
             @foreach (var pageItem in selectedGroup)
             {
-                <div class="col-12 col-md-6 col-lg-3 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header bg-primary text-white text-center">
+                <div class="col-12 col-md-6 col-lg-3 mb-4 d-flex">
+                    <div class="card h-100 d-flex flex-column">
+                        <div class="card-header bg-light text-dark text-center">
                             <h5 class="card-title mb-0">@pageItem.Name</h5>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body flex-grow-1">
                             @if (!string.IsNullOrEmpty(pageItem.Content) && pageItem.Content.Contains("<img"))
                             {
                                 <div class="image-preview">
@@ -39,12 +40,12 @@
                                 <p class="content-preview">@Html.Raw(Model.TruncateContent(pageItem.Content))</p>
                             }
                         </div>
-                        <div class="card-footer text-center">
+                        <div class="card-footer text-center mt-auto">
                             <a href="/ArticleDetail/@pageItem.Id" class="btn btn-primary">
-                                <i class="bi bi-box-arrow-in-right text-white"></i> 
+                                <i class="bi bi-box-arrow-in-right text-white"></i> View
                             </a>
                             <a hx-get="/Edit_Article/@pageItem.Id" hx-target="#content" class="btn btn-secondary ms-2">
-                                <i class="bi bi-pencil text-white"></i> 
+                                <i class="bi bi-pencil text-white"></i>
                             </a>
                             <a class="btn btn-danger ms-2"
                                hx-post="/delete-page/@pageItem.Id"
@@ -78,20 +79,37 @@ else
         display: block;
         margin: 0 auto;
     }
+
     .content-preview {
-        max-height: 150px; 
+        max-height: 150px;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
-        -webkit-line-clamp: 3; 
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
     }
+
     .card-body {
-        max-height: 200px; 
+        max-height: 200px;
         overflow: hidden;
     }
+
     .btn .bi {
-        color: white; 
+        color: white;
+    }
+
+    @@media (max-width: 767.98px) {
+        .col-12 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        .card {
+            width: 100%;
+        }
+    }
+
+    .card-header {
+        background-color: #f8f9fa; 
+        color: #212529; 
     }
 </style>
-

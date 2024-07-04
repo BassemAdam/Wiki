@@ -13,15 +13,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+    <script src="https://unpkg.com/htmx.org@1.6.1"></script>
     <style>
         .article-header {
             background-color: #f8f9fa;
             padding: 20px;
             border-bottom: 1px solid #dee2e6;
         }
+
         .article-content {
             padding: 20px;
         }
+
+            .article-content img {
+                max-width: 100%;
+                height: auto;
+                display: block;
+                margin: 0 auto;
+                padding: 10px 0;
+            }
+
         .article-footer {
             background-color: #f8f9fa;
             padding: 10px;
@@ -30,32 +47,80 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .visits-counter {
             font-size: 1.2em;
             color: #007bff;
             display: flex;
             align-items: center;
         }
-        .visits-counter i {
-            margin-right: 5px;
+
+            .visits-counter i {
+                margin-right: 5px;
+            }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            display: none;
         }
     </style>
     <title>@article.Name - Wiki</title>
 </head>
 <body>
-<div class="container">
-    <div class="article-header">
-        <h1>@article.Name</h1>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Wiki</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:history.back()">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div id="content" class="container">
+        <div class="article-header">
+            <h1>@article.Name</h1>
+        </div>
+        <div class="article-content">
+            @Html.Raw(article.Content)
+        </div>
+        <div class="article-footer">
+            <p>Last modified: @article.LastModifiedUtc.ToString("MMMM dd, yyyy")</p>
+            <p class="visits-counter">
+                <i class="fas fa-eye"></i> Did you know that this article has been visited @numberOfVisits times?
+            </p>
+        </div>
     </div>
-    <div class="article-content">
-        @Html.Raw(article.Content)
-    </div>
-    <div class="article-footer">
-        <p>Last modified: @article.LastModifiedUtc.ToString("MMMM dd, yyyy")</p>
-        <p class="visits-counter">
-            <i class="fas fa-eye"></i> Did you know that @numberOfVisits people have visited this Article?
-        </p>
-    </div>
-</div>
+    <button class="back-to-top" id="backToTopBtn"><i class="fas fa-arrow-up"></i></button>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var backToTopBtn = document.getElementById("backToTopBtn");
+        window.onscroll = function() {
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopBtn.style.display = "block";
+            } else {
+                backToTopBtn.style.display = "none";
+            }
+        };
+
+        backToTopBtn.onclick = function() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        };
+    </script>
 </body>
 </html>

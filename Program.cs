@@ -22,10 +22,11 @@ builder.Services
 builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Warning);
 
 var app = builder.Build();
-app.UseStaticFiles();
-app.UseStaticFiles(new StaticFileOptions {
+var webRootPath = app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+app.UseStaticFiles(new StaticFileOptions
+{
     FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.WebRootPath, "uploads")),
+          Path.Combine(webRootPath, "uploads")),
     RequestPath = "/uploads"
 });
 app.UseAntiforgery();

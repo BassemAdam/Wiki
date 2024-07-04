@@ -50,7 +50,7 @@
     <script>
         function initializeTinyMCE() {
             if (tinymce.get('Content')) {
-                tinymce.get('Content').remove(); // Remove existing instance
+                tinymce.get('Content').remove(); 
             }
             tinymce.init({
                 selector: '#Content',
@@ -79,23 +79,20 @@
                     input.click();
                 },
                 init_instance_callback: function (editor) {
-                    editor.getContainer().style.height = '500px'; // Initial minimum height
+                    editor.getContainer().style.height = '500px'; 
                 }
             });
         }
         function maybeInitializeTinyMCE() {
-            // Check if the TinyMCE textarea exists in the current document
             if (document.getElementById('Content')) {
                 initializeTinyMCE();
             }
         }
 
-        // Listen for HTMX afterSwap event to handle partial page loads
         document.body.addEventListener('htmx:afterSwap', function(event) {
             maybeInitializeTinyMCE();
         });
 
-        // Also initialize TinyMCE on full page load
         document.addEventListener('DOMContentLoaded', function() {
             maybeInitializeTinyMCE();
         });
