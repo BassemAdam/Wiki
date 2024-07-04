@@ -24,7 +24,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <a class="nav-link" hx-get="/Home" hx-target="#content">
+                <a class="nav-link" hx-get="/Home"  hx-target="#content">
                     <i class="bi bi-house-door"></i> Home
                 </a>
             </li>
@@ -48,13 +48,76 @@
 <div id="content" class="container mt-3" hx-get="/Home" hx-target="#content" hx-trigger="load">
 </div>
 
+
+<script>
+    function initializeTinyMCE() {
+        if (tinymce.get('Content')) {
+            tinymce.get('Content').remove(); // Remove existing instance
+        }
+        tinymce.init({
+            selector: '#Content',
+            plugins: 'image media link code',
+            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | code',
+            automatic_uploads: true,
+            images_upload_url: '/api/upload-image',
+            file_picker_types: 'image media',
+            file_picker_callback: function (cb, value, meta) {
+                var input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/*,video/*');
+                input.onchange = function () {
+                    var file = input.files[0];
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        var id = 'blobid' + (new Date()).getTime();
+                        var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                        var base64 = reader.result.split(',')[1];
+                        var blobInfo = blobCache.create(id, file, base64);
+                        blobCache.add(blobInfo);
+                        cb(blobInfo.blobUri(), { title: file.name });
+                    };
+                    reader.readAsDataURL(file);
+                };
+                input.click();
+            },
+            init_instance_callback: function (editor) {
+                editor.getContainer().style.height = '500px'; // Initial minimum height
+            }
+        });
+    }
+    function maybeInitializeTinyMCE() {
+        // Check if the TinyMCE textarea exists in the current document
+        if (document.getElementById('Content')) {
+            initializeTinyMCE();
+        }
+    }
+
+    // Listen for HTMX afterSwap event to handle partial page loads
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        maybeInitializeTinyMCE();
+    });
+
+    // Also initialize TinyMCE on full page load
+    document.addEventListener('DOMContentLoaded', function() {
+        maybeInitializeTinyMCE();
+    });
+    function validateForm() {
+        var content = tinymce.get('Content').getContent({ format: 'text' });
+        if (content.trim() === '') {
+            alert('Content is required.');
+            return false;
+        }
+        return true;
+    }
+
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var successMessage = document.getElementById('success-message');
         if (successMessage) {
             setTimeout(function () {
                 successMessage.style.display = 'none';
-            }, 5000); // Hide after 5 seconds
+            }, 3000); 
         }
     });
 </script>

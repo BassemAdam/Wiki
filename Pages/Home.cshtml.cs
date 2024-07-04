@@ -6,15 +6,6 @@ namespace Wiki.Pages
 {
     public class Home : PageModel
     {
-        private readonly WikiModel _wiki;
-
-        public Home(WikiModel wiki)
-        {
-            _wiki = wiki;
-        }
-
-   
-       
-
+        
     }
 }

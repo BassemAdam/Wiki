@@ -100,3 +100,72 @@ else
         color: white; /* set all icons inside buttons to white */
     }
 </style>
+
+<script>
+    let popularPageIndex = 0;
+    let recentlyAddedPageIndex = 0;
+
+    function updateButtons(containerId, pageIndex) {
+        const container = document.getElementById(containerId);
+        const prevButton = container.querySelector('.carousel-control-prev');
+        const nextButton = container.querySelector('.carousel-control-next');
+
+        if (pageIndex <= 0) {
+            prevButton.style.display = 'none';
+        } else {
+            prevButton.style.display = 'block';
+        }
+
+        const maxPageIndex = 5; // Change this as needed
+        if (pageIndex >= maxPageIndex) {
+            nextButton.style.display = 'none';
+        } else {
+            nextButton.style.display = 'block';
+        }
+
+        // Update the hx-vals attribute for the buttons
+        prevButton.setAttribute('hx-vals', JSON.stringify({ page: pageIndex - 1 }));
+        nextButton.setAttribute('hx-vals', JSON.stringify({ page: pageIndex + 1 }));
+    }
+
+    function handleButtonClick(button, increment, containerId) {
+        let pageIndex;
+        if (containerId.includes('popular')) {
+            pageIndex = popularPageIndex + increment;
+            if (pageIndex < 0) pageIndex = 0;
+            popularPageIndex = pageIndex;
+        } else {
+            pageIndex = recentlyAddedPageIndex + increment;
+            if (pageIndex < 0) pageIndex = 0;
+            recentlyAddedPageIndex = pageIndex;
+        }
+
+        updateButtons(containerId, pageIndex);
+    }
+
+    document.querySelectorAll('.carousel-control-prev').forEach(button => {
+        button.addEventListener('click', function() {
+            const containerId = this.closest('.carousel-container').id;
+            handleButtonClick(this, -1, containerId);
+        });
+    });
+
+    document.querySelectorAll('.carousel-control-next').forEach(button => {
+        button.addEventListener('click', function() {
+            const containerId = this.closest('.carousel-container').id;
+            handleButtonClick(this, 1, containerId);
+        });
+    });
+
+    htmx.on('htmx:afterRequest', function(evt) {
+        const target = evt.detail.target.closest('.carousel-container');
+        if (target.id.includes('popular')) {
+            updateButtons(target.id, popularPageIndex);
+        } else {
+            updateButtons(target.id, recentlyAddedPageIndex);
+        }
+    });
+
+    updateButtons('popularArticlesContainer', popularPageIndex);
+    updateButtons('recentlyAddedArticlesContainer', recentlyAddedPageIndex);
+</script>

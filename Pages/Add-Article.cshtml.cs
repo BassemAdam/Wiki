@@ -30,10 +30,11 @@ public class Add_Article : PageModel
     [BindProperty]
     public ArticleInputModel FormInput { get; set; }
 
-    public void OnGet()
+    public IActionResult OnGet()
     {
         var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
         __RequestVerificationToken = tokens.RequestToken;
+        return Page();
     }
 
     public async Task<IActionResult> OnPostAsync()
