@@ -91,49 +91,41 @@
     }
 
     function handleButtonClick(button, increment, containerId) {
-        const container = document.getElementById(containerId);
-        let pageIndex = containerId.includes('popular') ? popularPageIndex : recentlyAddedPageIndex;
-
-        pageIndex += increment;
-        if (pageIndex < 0) pageIndex = 0;
-
+        let pageIndex;
         if (containerId.includes('popular')) {
+            pageIndex = popularPageIndex + increment;
+            if (pageIndex < 0) pageIndex = 0;
             popularPageIndex = pageIndex;
         } else {
+            pageIndex = recentlyAddedPageIndex + increment;
+            if (pageIndex < 0) pageIndex = 0;
             recentlyAddedPageIndex = pageIndex;
         }
 
         updateButtons(containerId, pageIndex);
     }
 
-    document.querySelectorAll('#popularArticlesContainer .carousel-control-prev').forEach(button => {
+    document.querySelectorAll('.carousel-control-prev').forEach(button => {
         button.addEventListener('click', function() {
-            handleButtonClick(this, -1, 'popularArticlesContainer');
+            const containerId = this.closest('.carousel-container').id;
+            handleButtonClick(this, -1, containerId);
         });
     });
 
-    document.querySelectorAll('#popularArticlesContainer .carousel-control-next').forEach(button => {
+    document.querySelectorAll('.carousel-control-next').forEach(button => {
         button.addEventListener('click', function() {
-            handleButtonClick(this, 1, 'popularArticlesContainer');
-        });
-    });
-
-    document.querySelectorAll('#recentlyAddedArticlesContainer .carousel-control-prev').forEach(button => {
-        button.addEventListener('click', function() {
-            handleButtonClick(this, -1, 'recentlyAddedArticlesContainer');
-        });
-    });
-
-    document.querySelectorAll('#recentlyAddedArticlesContainer .carousel-control-next').forEach(button => {
-        button.addEventListener('click', function() {
-            handleButtonClick(this, 1, 'recentlyAddedArticlesContainer');
+            const containerId = this.closest('.carousel-container').id;
+            handleButtonClick(this, 1, containerId);
         });
     });
 
     htmx.on('htmx:afterRequest', function(evt) {
-        const target = evt.detail.target;
-        const pageIndex = target.id.includes('popular') ? popularPageIndex : recentlyAddedPageIndex;
-        updateButtons(target.id, pageIndex);
+        const target = evt.detail.target.closest('.carousel-container');
+        if (target.id.includes('popular')) {
+            updateButtons(target.id, popularPageIndex);
+        } else {
+            updateButtons(target.id, recentlyAddedPageIndex);
+        }
     });
 
     updateButtons('popularArticlesContainer', popularPageIndex);

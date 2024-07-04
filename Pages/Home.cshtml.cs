@@ -1,18 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WikiModel = Wiki.Models.Wiki;
 
-namespace Wiki.Pages;
-
-public class Home : PageModel
+namespace Wiki.Pages
 {
-    private readonly Models.Wiki _wiki;
-    public Home(Models.Wiki wiki)
+    public class Home : PageModel
     {
-        _wiki = wiki;
+        private readonly WikiModel _wiki;
+
+        public Home(WikiModel wiki)
+        {
+            _wiki = wiki;
+        }
+
+   
+       
+
     }
-    public void OnGet()
-    {
-        
-    }
-  
 }

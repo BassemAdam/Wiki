@@ -3,6 +3,7 @@
 
 @{
     var article = Model.Article;
+    var numberOfVisits = Model.Article.NumOfVisits;
 }
 
 <!DOCTYPE html>
@@ -25,6 +26,18 @@
             background-color: #f8f9fa;
             padding: 10px;
             border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .visits-counter {
+            font-size: 1.2em;
+            color: #007bff;
+            display: flex;
+            align-items: center;
+        }
+        .visits-counter i {
+            margin-right: 5px;
         }
     </style>
     <title>@article.Name - Wiki</title>
@@ -39,6 +52,9 @@
     </div>
     <div class="article-footer">
         <p>Last modified: @article.LastModifiedUtc.ToString("MMMM dd, yyyy")</p>
+        <p class="visits-counter">
+            <i class="fas fa-eye"></i> Did you know that @numberOfVisits people have visited this Article?
+        </p>
     </div>
 </div>
 </body>

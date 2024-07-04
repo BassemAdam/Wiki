@@ -1,8 +1,12 @@
+using System.Text.RegularExpressions;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 using Wiki.Models;
 
+#region App Setup
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
@@ -18,8 +22,19 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Warning);
 
 var app = builder.Build();
+app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.WebRootPath, "uploads")),
+    RequestPath = "/uploads"
+});
+app.UseAntiforgery();
 app.MapRazorPages();
 
+#endregion
+
+#region EndPoints
 app.MapGet("/", async context =>{
     context.Response.Redirect("/Index");
 });
@@ -98,9 +113,14 @@ app.MapGet("/page/{pageName}", async context =>{
         </form>");
 });
 
-app.MapPost("/delete-page", async context =>{
-    var form = await context.Request.ReadFormAsync();
-    var id = int.Parse(form["id"]);
+app.MapPost("/delete-page/{id}", async context =>{
+    var idStr = context.Request.RouteValues["id"] as string;
+    if (string.IsNullOrEmpty(idStr) || !int.TryParse(idStr, out var id))
+    {
+        context.Response.StatusCode = 400;
+        await context.Response.WriteAsync("Invalid or missing id parameter");
+        return;
+    }
 
     var config = context.RequestServices.GetRequiredService<WikiConfig>();
     var wiki = context.RequestServices.GetRequiredService<Wiki.Models.Wiki>();
@@ -112,7 +132,7 @@ app.MapPost("/delete-page", async context =>{
         return;
     }
 
-    context.Response.Redirect("/");
+    context.Response.Redirect("/Index");
 });
 
 app.MapPost("/delete-attachment", async context =>{
@@ -177,6 +197,131 @@ app.MapGet("/htmx/page-content/{pageName}", async context =>{
 //
 //     await context.Response.WriteAsync("Page created successfully.");
 // });
+
+app.MapPost("/api/upload-image", async context =>
+{
+    var request = context.Request;
+    var form = await request.ReadFormAsync();
+    var file = form.Files["file"];
+    var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
+
+    if (file == null || file.Length == 0)
+    {
+        context.Response.StatusCode = 400;
+        await context.Response.WriteAsync("Upload a file");
+        return;
+    }
+
+    var uploads = Path.Combine(env.WebRootPath, "uploads");
+    if (!Directory.Exists(uploads))
+        Directory.CreateDirectory(uploads);
+
+    var filePath = Path.Combine(uploads, Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
+    using (var stream = new FileStream(filePath, FileMode.Create))
+    {
+        await file.CopyToAsync(stream);
+    }
+
+    var fileUrl = $"/uploads/{Path.GetFileName(filePath)}";
+    context.Response.ContentType = "application/json";
+    await context.Response.WriteAsync($"{{\"location\": \"{fileUrl}\"}}");
+});
+
+app.MapPost("/api/add-article", async context => {
+    var request = context.Request;
+    var form = await request.ReadFormAsync();
+    var articleName = form["FormInput.ArticleName"];
+    var content = form["FormInput.Content"];
+    var wiki = context.RequestServices.GetRequiredService<Wiki.Models.Wiki>();
+
+    // Extract image URLs from content
+    var imageUrls = new List<string>();
+    var regex = new Regex("<img[^>]+src=\"(.*?)\"[^>]*>", RegexOptions.IgnoreCase);
+    var matches = regex.Matches(content);
+    foreach (Match match in matches)
+    {
+        imageUrls.Add(match.Groups[1].Value);
+    }
+
+    var input = new PageInput(
+        null,
+        articleName,
+        content,
+        string.Join(";", imageUrls)
+    );
+
+    var (success, page, exception) = wiki.SavePage(input);
+    if (!success)
+    {
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsync(exception?.Message);
+        return;
+    }
+
+    context.Response.ContentType = "application/json";
+    await context.Response.WriteAsync("{\"success\": true, \"message\": \"Article added successfully\"}");
+});
+
+app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpContext context) => {
+    var wiki = context.RequestServices.GetRequiredService<Wiki.Models.Wiki>();
+    var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
+
+    var oldPage = wiki.GetPageById(input.Id.Value); // Get the current page before updating
+
+    if (oldPage == null)
+    {
+        context.Response.StatusCode = 404;
+        await context.Response.WriteAsync("Page not found");
+        return;
+    }
+
+    // Extract new image URLs from content
+    var newImageUrls = new List<string>();
+    var regex = new Regex("<img[^>]+src=\"(.*?)\"[^>]*>", RegexOptions.IgnoreCase);
+    var matches = regex.Matches(input.Content);
+    foreach (Match match in matches)
+    {
+        newImageUrls.Add(match.Groups[1].Value);
+    }
+
+    // List of old image URLs
+    var oldImageUrls = oldPage.Attachments ?? new List<string>();
+
+    // Find images that are no longer used
+    var imagesToDelete = oldImageUrls.Except(newImageUrls).ToList();
+
+    // Delete unused images from the uploads folder
+    foreach (var imageUrl in imagesToDelete)
+    {
+        var fileName = Path.GetFileName(imageUrl);
+        var filePath = Path.Combine(env.WebRootPath, "uploads", fileName);
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+    }
+
+    // Update the page with new content and image URLs
+    var updatedPage = new PageInput(
+        input.Id,
+        input.Name,
+        input.Content,
+        string.Join(";", newImageUrls)
+    );
+
+    var (success, page, exception) = wiki.SavePage(updatedPage);
+    if (!success)
+    {
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsync(exception?.Message);
+        return;
+    }
+
+    context.Response.ContentType = "application/json";
+    await context.Response.WriteAsync("{\"success\": true, \"message\": \"Article updated successfully\"}");
+});
+
+#endregion
 
 app.Run();
 

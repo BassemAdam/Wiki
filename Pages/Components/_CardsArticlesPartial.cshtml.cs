@@ -17,8 +17,31 @@ namespace Wiki.Pages.Components
         public void OnGet()
         {
             OnGetRecentlyModifiedArticles();
+            OnGetPopularArticles();
         }
+        public IActionResult OnGetPopularArticles()
+        {
+            var pages = _wiki.GetAllPagesDetails()
+                .OrderByDescending(x => x.NumOfVisits)
+                .Take(10); // Get the top 10 most visited articles
 
+            if (pages != null)
+            {
+                foreach (Models.Page page in pages)
+                {
+                    Console.WriteLine(page.Name);
+                }
+            }
+            else
+            {
+                Console.WriteLine("No pages found");
+            }
+
+            Pages = pages; // Populate the Model.Pages property
+
+            return Page();
+        }
+        
         public IActionResult OnGetRecentlyModifiedArticles()
         {
             var pages = _wiki.GetAllPagesDetails()
@@ -41,8 +64,6 @@ namespace Wiki.Pages.Components
 
             return Page();
         }
-
-        
     }
 }
 

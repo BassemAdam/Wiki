@@ -1,0 +1,56 @@
+﻿@page
+@model Wiki.Pages.Shared._ArticleForm
+
+<div class="uk-container">
+    <h1>Add Article</h1>
+    <form id="article-form" method="post" action="/api/add-article" enctype="multipart/form-data">
+        <input type="hidden" name="__RequestVerificationToken" value="@Model.__RequestVerificationToken">
+        <div class="uk-form-stacked">
+            <div class="uk-margin">
+                <label class="uk-form-label" for="ArticleName">Name</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="ArticleName" name="FormInput.ArticleName" type="text" value="@Model.FormInput.ArticleName ?? string.Empty" required>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <label class="uk-form-label" for="Content">Content</label>
+                <div class="uk-form-controls">
+                    <textarea class="uk-textarea" id="Content" name="FormInput.Content">@Model.FormInput.Content ?? string.Empty</textarea>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <button class="uk-button uk-button-primary" type="submit">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    tinymce.init({
+        selector: '#Content',
+        plugins: 'image media link code',
+        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | code',
+        automatic_uploads: true,
+        images_upload_url: '/api/upload-image',
+        file_picker_types: 'image media',
+        file_picker_callback: function (cb, value, meta) {
+            var input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*,video/*');
+            input.onchange = function () {
+                var file = input.files[0];
+                var reader = new FileReader();
+                reader.onload = function () {
+                    var id = 'blobid' + (new Date()).getTime();
+                    var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                    var base64 = reader.result.split(',')[1];
+                    var blobInfo = blobCache.create(id, file, base64);
+                    blobCache.add(blobInfo);
+                    cb(blobInfo.blobUri(), { title: file.name });
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+    });
+</script>

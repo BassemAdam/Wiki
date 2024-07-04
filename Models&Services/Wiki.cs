@@ -18,7 +18,10 @@ public class Wiki
         _sanitizer = new HtmlSanitizer();
         _pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
     }
-
+    public Page? GetPageById(int id)
+    {
+        return _pages.FindById(id);
+    }
     public Page? GetPage(string name) => _pages.FindOne(x => x.Name == name);
 
     public IEnumerable<string> GetAllPages() => _pages.FindAll().Select(x => x.Name);
@@ -78,7 +81,15 @@ public class Wiki
             return (false, ex);
         }
     }
-
+    public void IncrementVisitCounter(int pageId)
+    {
+        var page = _pages.FindById(pageId);
+        if (page != null)
+        {
+            page.NumOfVisits++;
+            _pages.Update(page);
+        }
+    }
     public (bool, Page?, Exception?) DeleteAttachment(int pageId, string fileName)
     {
         try

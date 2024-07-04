@@ -22,6 +22,7 @@ namespace Wiki.Pages
             {
                 return NotFound();
             }
+            _wiki.IncrementVisitCounter(id);
             return Page();
         }
     }
