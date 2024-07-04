@@ -234,6 +234,9 @@ app.MapPost("/api/add-article", async context => {
     var content = form["FormInput.Content"];
     var wiki = context.RequestServices.GetRequiredService<Wiki.Models.Wiki>();
 
+    // Modify image URLs to be root-relative
+    content = wiki.MakeImageUrlsRootRelative(content);
+
     // Extract image URLs from content
     var imageUrls = new List<string>();
     var regex = new Regex("<img[^>]+src=\"(.*?)\"[^>]*>", RegexOptions.IgnoreCase);
@@ -275,10 +278,13 @@ app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpCont
         return;
     }
 
+    // Modify image URLs to be root-relative
+    var modifiedContent = wiki.MakeImageUrlsRootRelative(input.Content);
+
     // Extract new image URLs from content
     var newImageUrls = new List<string>();
     var regex = new Regex("<img[^>]+src=\"(.*?)\"[^>]*>", RegexOptions.IgnoreCase);
-    var matches = regex.Matches(input.Content);
+    var matches = regex.Matches(modifiedContent);
     foreach (Match match in matches)
     {
         newImageUrls.Add(match.Groups[1].Value);
@@ -305,7 +311,7 @@ app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpCont
     var updatedPage = new PageInput(
         input.Id,
         input.Name,
-        input.Content,
+        modifiedContent,
         string.Join(";", newImageUrls)
     );
 

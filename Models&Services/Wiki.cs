@@ -1,4 +1,5 @@
-﻿using Ganss.Xss;
+﻿using System.Text.RegularExpressions;
+using Ganss.Xss;
 using LiteDB;
 using Markdig;
 namespace Wiki.Models;
@@ -65,6 +66,21 @@ public class Wiki
             return (false, null, ex);
         }
     }
+    
+    public  string MakeImageUrlsRootRelative(string content)
+    {
+        var regex = new Regex("<img[^>]+src=\"(?!http)(.*?)\"[^>]*>", RegexOptions.IgnoreCase);
+        return regex.Replace(content, match =>
+        {
+            var srcValue = match.Groups[1].Value;
+            if (!srcValue.StartsWith("/"))
+            {
+                srcValue = "/" + srcValue;
+            }
+            return match.Value.Replace(match.Groups[1].Value, srcValue);
+        });
+    }
+
 
     public (bool, Exception?) DeletePage(int id, string homePageName)
     {
