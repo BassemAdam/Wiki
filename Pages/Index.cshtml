@@ -16,27 +16,30 @@
 
 </head>
 <body>
-<nav class="uk-navbar-container">
-    <div class="uk-container">
-        <div class="uk-navbar">
-            <div class="uk-navbar-left">
-                <ul class="uk-navbar-nav">
-                    <li class="uk-active"><a hx-get="/Home" hx-target="#content"><span uk-icon="home"></span></a></li>
-                    <li><a hx-get="/Add-Article" hx-target="#content"><span uk-icon="plus"></span> Add Article</a></li>
-                </ul>
-            </div>
-            <div class="uk-navbar-right">
-               <form class="uk-search uk-search-navbar uk-grid-small uk-grid">
-                    <div class="uk-width-expand">
-                        <input class="uk-search-input form-control" type="search" name="query" id="query" autocomplete="off" hx-get="/Search" hx-target="#content" hx-trigger="keyup changed delay:250ms" hx-indicator="#loading" placeholder="Search..." aria-label="Username" aria-describedby="search-addon" style="padding-right: 40px;">
-                        <span uk-icon="search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></span>
-                    </div>
-                </form>
-            </div>
-        </div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Wiki</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" hx-get="/Home" hx-target="#content">
+                    <i class="bi bi-house-door"></i> Home
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" hx-get="/Add-Article" hx-target="#content">
+                    <i class="bi bi-plus-circle"></i> Add Article
+                </a>
+            </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" name="query" id="query" autocomplete="off" hx-get="/Search" hx-target="#content" hx-trigger="keyup changed delay:250ms" hx-indicator="#loading" placeholder="Search..." aria-label="Search">
+        </form>
     </div>
 </nav>
-<div id="content" class="uk-container" hx-get="/Home" hx-target="#content" hx-trigger="load">
+<div id="content" class="container mt-3" hx-get="/Home" hx-target="#content" hx-trigger="load">
 </div>
 <script>
     document.body.addEventListener('htmx:afterRequest', function (event) {
@@ -44,12 +47,10 @@
             var response = JSON.parse(event.detail.xhr.responseText);
             if (response.success && response.message.includes('Article added successfully')) {
                 location.reload();
-                    alert('Article added successfully');
+                alert('Article added successfully');
             }
         }
     });
-    
-
 </script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>

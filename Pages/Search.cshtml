@@ -11,13 +11,13 @@
         <div class="row">
             @foreach (var result in Model.SearchResults)
             {
-                <div class="col">
+                <div class="col-12 col-md-6 col-lg-3 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-primary text-white text-center">
                             <h5 class="card-title mb-0">@result.Name</h5>
                         </div>
                         <div class="card-body">
-                            <p class="content-preview">@Html.Raw(result.Content)</p>
+                            <p class="content-preview">@Html.Raw(Model.TruncateContent(result.Content))</p>
                         </div>
                         <div class="card-footer text-center">
                             <a href="/ArticleDetail/@result.Id" class="btn btn-primary">
@@ -44,3 +44,21 @@
         <p>No results found.</p>
     }
 </div>
+
+<style>
+    .content-preview {
+        max-height: 150px; /* limit the height to prevent overflow */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* number of lines to show */
+        -webkit-box-orient: vertical;
+    }
+    .card-body {
+        max-height: 200px; /* Adjust the max height as needed */
+        overflow: hidden;
+    }
+    .btn .bi {
+        color: white; /* set all icons inside buttons to white */
+    }
+</style>

@@ -3,7 +3,7 @@
 
 <div class="uk-container">
     <h1>Edit Article</h1> <!-- Changed title to reflect the action -->
-   <form id="article-form" method="post" action="/api/edit-article" enctype="multipart/form-data">
+   <form id="article-form" method="post" action="/api/edit-article" enctype="multipart/form-data" onsubmit="return validateForm()">
         <input type="hidden" name="__RequestVerificationToken" value="@Model.__RequestVerificationToken">
        <input type="hidden" name="Id" value="@Model.Id"> <!-- Hidden field for the ID -->
        <div class="uk-form-stacked">
@@ -52,6 +52,29 @@
                 reader.readAsDataURL(file);
             };
             input.click();
+        },
+        setup: function (editor) {
+            editor.on('init', function () {
+                var content = tinymce.get('Content').getContent({ format: 'text' });
+                var lines = content.split('\n').length;
+                var height = Math.max(200, lines * 20); // Adjust height based on content, with a minimum height of 200px
+                editor.theme.resizeTo(null, height);
+            });
+            editor.on('input', function () {
+                var content = editor.getContent({ format: 'text' });
+                var lines = content.split('\n').length;
+                var height = Math.max(200, lines * 20); // Adjust height based on content, with a minimum height of 200px
+                editor.theme.resizeTo(null, height);
+            });
         }
     });
+
+    function validateForm() {
+        var content = tinymce.get('Content').getContent({ format: 'text' });
+        if (content.trim() === '') {
+            alert('Content is required.');
+            return false;
+        }
+        return true;
+    }
 </script>
