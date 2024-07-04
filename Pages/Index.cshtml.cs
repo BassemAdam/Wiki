@@ -3,10 +3,11 @@ using Wiki.Models;
 
 public class IndexModel : PageModel
 {
-    public string HomePageName { get; set; }
+    public string SuccessMessage { get; private set; }
 
-    public IndexModel(WikiConfig config)
+    public void OnGet()
     {
-        HomePageName = config.HomePageName;
+        SuccessMessage = HttpContext.Session.GetString("SuccessMessage");
+        HttpContext.Session.Remove("SuccessMessage");
     }
 }

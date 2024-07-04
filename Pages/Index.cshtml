@@ -1,4 +1,5 @@
 ﻿@page
+@model IndexModel
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +14,6 @@
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
     <script src="https://unpkg.com/htmx.org@1.6.1"></script>
     <script src="https://cdn.tiny.cloud/1/nihnic0nvndl86pd0q06ns6u4fx0vl7x71v390w1qqcqlx63/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -39,16 +39,22 @@
         </form>
     </div>
 </nav>
+@if (Model.SuccessMessage != null)
+{
+<div id="success-message" class="alert alert-success" role="alert">
+    @Model.SuccessMessage
+</div>
+}
 <div id="content" class="container mt-3" hx-get="/Home" hx-target="#content" hx-trigger="load">
 </div>
+
 <script>
-    document.body.addEventListener('htmx:afterRequest', function (event) {
-        if (event.detail.target.id === 'content') {
-            var response = JSON.parse(event.detail.xhr.responseText);
-            if (response.success && response.message.includes('Article added successfully')) {
-                location.reload();
-                alert('Article added successfully');
-            }
+    document.addEventListener('DOMContentLoaded', function () {
+        var successMessage = document.getElementById('success-message');
+        if (successMessage) {
+            setTimeout(function () {
+                successMessage.style.display = 'none';
+            }, 5000); // Hide after 5 seconds
         }
     });
 </script>

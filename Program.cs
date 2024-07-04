@@ -7,18 +7,24 @@ using Microsoft.Extensions.FileProviders;
 using Wiki.Models;
 
 #region App Setup
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddAntiforgery()
     .AddMemoryCache()
+    .AddDistributedMemoryCache()
+    .AddSession(options => {
+        options.IdleTimeout = TimeSpan.FromMinutes(30);
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+    })
     .AddSingleton<Wiki.Models.Wiki>()
     .AddRazorPages()
-    .AddRazorRuntimeCompilation();
-
-builder.Services.AddSingleton(new WikiConfig { PageName = "page-name", HomePageName = "home-page" });
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+    .AddRazorRuntimeCompilation()
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>())
+    ;
+    
 builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Warning);
 
 var app = builder.Build();
@@ -29,6 +35,7 @@ app.UseStaticFiles(new StaticFileOptions {
     RequestPath = "/uploads"
 });
 app.UseAntiforgery();
+app.UseSession();
 app.MapRazorPages();
 
 #endregion
@@ -184,10 +191,9 @@ app.MapPost("/delete-page/{id}", async context =>{
         await context.Response.WriteAsync("Invalid or missing id parameter");
         return;
     }
-
-    var config = context.RequestServices.GetRequiredService<WikiConfig>();
+    
     var wiki = context.RequestServices.GetRequiredService<Wiki.Models.Wiki>();
-    var (isOk, exception) = wiki.DeletePage(id, config.HomePageName);
+    var (isOk, exception) = wiki.DeletePage(id);
     if (!isOk)
     {
         context.Response.StatusCode = 500;
@@ -260,8 +266,8 @@ app.MapPost("/api/add-article", async context => {
         return;
     }
 
-    context.Response.ContentType = "application/json";
-    await context.Response.WriteAsync("{\"success\": true, \"message\": \"Article added successfully\"}");
+    context.Session.SetString("SuccessMessage", "Article added successfully");
+    context.Response.Redirect("/Index");
 });
 
 app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpContext context) => {
@@ -326,8 +332,8 @@ app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpCont
         return;
     }
 
-    context.Response.ContentType = "application/json";
-    await context.Response.WriteAsync("{\"success\": true, \"message\": \"Article updated successfully\"}");
+    context.Session.SetString("SuccessMessage", "Article Edited successfully");
+    context.Response.Redirect("/Index");
 });
 
 #endregion

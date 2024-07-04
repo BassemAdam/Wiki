@@ -43,6 +43,7 @@ public class Wiki
             {
                 page = _pages.FindById(input.Id.Value);
                 if (page == null) throw new Exception("Page not found");
+                page.Name = input.Name;
                 page.Content = sanitizedContent;
                 page.LastModifiedUtc = DateTime.UtcNow;
                 page.Attachments =  input.FilePaths.Split(';').ToList();
@@ -82,13 +83,12 @@ public class Wiki
     }
 
 
-    public (bool, Exception?) DeletePage(int id, string homePageName)
+    public (bool, Exception?) DeletePage(int id)
     {
         try
         {
             var page = _pages.FindById(id);
             if (page == null) throw new Exception("Page not found");
-            if (page.Name == homePageName) throw new Exception("Cannot delete home page");
             _pages.Delete(id);
             return (true, null);
         }
