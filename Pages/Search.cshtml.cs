@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using WikiPage = Wiki.Models.Page; // Alias for Wiki.Models.Page
-using System.Collections.Generic;
-using System.Linq;
+using WikiPage = Wiki.Models.Page; 
 using System.Text.RegularExpressions;
 
 namespace Wiki.Pages
@@ -15,7 +13,7 @@ namespace Wiki.Pages
             _wiki = wiki;
         }
 
-        public IEnumerable<WikiPage> SearchResults { get; private set; } // Use the alias here
+        public IEnumerable<WikiPage> SearchResults { get; private set; } 
 
        public void OnGet(string query)
         {
@@ -34,8 +32,7 @@ namespace Wiki.Pages
     public string TruncateContent(string content, int maxLength = 300)
     {
         if (string.IsNullOrEmpty(content)) return content;
-
-        // Check if the content is HTML
+        
         if (content.Contains("<"))
         {
             return TruncateHtml(content, maxLength);
@@ -56,8 +53,7 @@ namespace Wiki.Pages
     private string TruncateHtml(string html, int maxLength)
     {
         if (html.Length <= maxLength) return html;
-
-        // Truncate and close open tags
+        
         var truncatedHtml = html.Substring(0, maxLength) + "...";
         return CloseOpenTags(truncatedHtml);
     }

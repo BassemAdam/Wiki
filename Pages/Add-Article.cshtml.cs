@@ -3,12 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Hosting;
-using System.IO;
-using System.Threading.Tasks;
 using Wiki.Models;
-using Page = Wiki.Models.Page;
-
 namespace Wiki.Pages;
 
 public class Add_Article : PageModel
@@ -43,8 +38,7 @@ public class Add_Article : PageModel
         {
             return Page();
         }
-
-        // Extract image URLs from content
+        
         var imageUrls = new List<string>();
         var regex = new Regex("<img[^>]+src=\"(.*?)\"[^>]*>", RegexOptions.IgnoreCase);
         var matches = regex.Matches(FormInput.Content);

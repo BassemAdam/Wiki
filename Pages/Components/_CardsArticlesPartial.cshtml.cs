@@ -24,7 +24,7 @@ namespace Wiki.Pages.Components
         {
             var pages = _wiki.GetAllPagesDetails()
                 .OrderByDescending(x => x.NumOfVisits)
-                .Take(8); // Get the top 10 most visited articles
+                .Take(8); 
 
             if (pages != null)
             {
@@ -38,7 +38,7 @@ namespace Wiki.Pages.Components
                 Console.WriteLine("No pages found");
             }
 
-            Pages = pages; // Populate the Model.Pages property
+            Pages = pages; 
 
             return Page();
         }
@@ -47,7 +47,7 @@ namespace Wiki.Pages.Components
         {
             var pages = _wiki.GetAllPagesDetails()
             .OrderByDescending(x => x.LastModifiedUtc)
-            .Take(10); // Adjust the number of articles as needed
+            .Take(8); 
 
             if (pages != null)
             {
@@ -61,15 +61,14 @@ namespace Wiki.Pages.Components
                 Console.WriteLine("No pages found");
             }
            
-            Pages = pages; // Populate the Model.Pages property
+            Pages = pages; 
 
             return Page();
         }
         public string TruncateContent(string content, int maxLength = 300)
         {
             if (string.IsNullOrEmpty(content)) return content;
-
-            // Check if the content is HTML
+            
             if (content.Contains("<"))
             {
                 return TruncateHtml(content, maxLength);
@@ -90,8 +89,7 @@ namespace Wiki.Pages.Components
         private string TruncateHtml(string html, int maxLength)
         {
             if (html.Length <= maxLength) return html;
-
-            // Truncate and close open tags
+            
             var truncatedHtml = html.Substring(0, maxLength) + "...";
             return CloseOpenTags(truncatedHtml);
         }

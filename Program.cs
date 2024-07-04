@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Wiki.Models;
@@ -7,7 +6,6 @@ using Wiki.Models;
 #region App Setup
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services
     .AddAntiforgery()
     .AddMemoryCache()
@@ -19,9 +17,7 @@ builder.Services
     })
     .AddSingleton<Wiki.Models.Wiki>()
     .AddRazorPages()
-    .AddRazorRuntimeCompilation()
-    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>())
-    ;
+    .AddRazorRuntimeCompilation();
     
 builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Warning);
 
@@ -95,11 +91,9 @@ app.MapPost("/api/add-article", async context => {
     var articleName = form["FormInput.ArticleName"];
     var content = form["FormInput.Content"];
     var wiki = context.RequestServices.GetRequiredService<Wiki.Models.Wiki>();
-
-    // Modify image URLs to be root-relative
+    
     content = wiki.MakeImageUrlsRootRelative(content);
-
-    // Extract image URLs from content
+    
     var imageUrls = new List<string>();
     var regex = new Regex("<img[^>]+src=\"(.*?)\"[^>]*>", RegexOptions.IgnoreCase);
     var matches = regex.Matches(content);
@@ -131,7 +125,7 @@ app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpCont
     var wiki = context.RequestServices.GetRequiredService<Wiki.Models.Wiki>();
     var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
 
-    var oldPage = wiki.GetPageById(input.Id.Value); // Get the current page before updating
+    var oldPage = wiki.GetPageById(input.Id.Value); 
 
     if (oldPage == null)
     {
@@ -139,11 +133,9 @@ app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpCont
         await context.Response.WriteAsync("Page not found");
         return;
     }
-
-    // Modify image URLs to be root-relative
+    
     var modifiedContent = wiki.MakeImageUrlsRootRelative(input.Content);
-
-    // Extract new image URLs from content
+    
     var newImageUrls = new List<string>();
     var regex = new Regex("<img[^>]+src=\"(.*?)\"[^>]*>", RegexOptions.IgnoreCase);
     var matches = regex.Matches(modifiedContent);
@@ -151,18 +143,13 @@ app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpCont
     {
         newImageUrls.Add(match.Groups[1].Value);
     }
-
-    // List of old image URLs
+    
     var oldImageUrls = oldPage.Attachments ?? new List<string>();
-
-    // Find images that are no longer used
     var imagesToDelete = oldImageUrls.Except(newImageUrls).ToList();
-
-    // Delete unused images from the uploads folder
+    
     foreach (var imageUrl in imagesToDelete)
     {
         var fileName = Path.GetFileName(imageUrl);
-        // Ensure fileName is not null or empty
         if (!string.IsNullOrEmpty(fileName))
         {
             var filePath = Path.Combine(env.WebRootPath, "uploads", fileName);
@@ -172,8 +159,7 @@ app.MapPost("/api/edit-article", async ([FromForm] PageInputEdit input, HttpCont
             }
         }
     }
-
-    // Update the page with new content and image URLs
+    
     var updatedPage = new PageInput(
         input.Id,
         input.Name,

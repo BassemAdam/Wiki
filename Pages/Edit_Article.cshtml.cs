@@ -30,8 +30,7 @@ namespace Wiki.Pages
             Id = id;
             var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
             __RequestVerificationToken = tokens.RequestToken;
-
-            // Load the article from the database
+            
             var article = _wiki.GetPageById(id);
 
             if (article != null)

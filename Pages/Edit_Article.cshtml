@@ -3,8 +3,8 @@
 
 <style>
     .tox .tox-editor-container {
-        min-height: 500px; /* Initial minimum height */
-        resize: vertical; /* Allow vertical resizing */
+        min-height: 500px; 
+        resize: vertical; 
         overflow: auto;
     }
     .tox .tox-edit-area__iframe {
@@ -14,10 +14,10 @@
 
 
 <div class="uk-container">
-    <h1>Edit Article</h1> <!-- Changed title to reflect the action -->
+    <h1>Edit Article</h1> 
     <form id="article-form" method="post" action="/api/edit-article" enctype="multipart/form-data" onsubmit="return validateForm()">
         <input type="hidden" name="__RequestVerificationToken" value="@Model.__RequestVerificationToken">
-        <input type="hidden" name="Id" value="@Model.Id"> <!-- Hidden field for the ID -->
+        <input type="hidden" name="Id" value="@Model.Id"> 
         <div class="uk-form-stacked">
             <div class="uk-margin">
                 <label class="uk-form-label" for="ArticleName">Name</label>
@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="uk-margin">
-                <button class="uk-button uk-button-primary" type="submit">Update</button> <!-- Changed button text to Update -->
+                <button class="uk-button uk-button-primary" type="submit">Update</button> 
             </div>
         </div>
     </form>
@@ -41,7 +41,7 @@
 <script>
     function initializeTinyMCE() {
         if (tinymce.get('Content')) {
-            tinymce.get('Content').remove(); // Remove existing instance
+            tinymce.get('Content').remove(); 
         }
         tinymce.init({
             selector: '#Content',
@@ -70,7 +70,7 @@
                 input.click();
             },
             init_instance_callback: function (editor) {
-                editor.getContainer().style.height = '500px'; // Initial minimum height
+                editor.getContainer().style.height = '500px'; 
             }
         });
     }
